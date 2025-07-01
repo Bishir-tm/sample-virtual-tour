@@ -100,22 +100,56 @@
 
       /* instruction animations */
       .hand-animation {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%23ffffff'%3E%3Cpath d='M480 192h-16v-72C464 53.8 410.2 0 344 0c-38.7 0-74.9 17.4-98.9 46.9C256.2 63.7 256 79.9 256 96v192h-64V80c0-22.1-17.9-40-40-40s-40 17.9-40 40v304c0 74.1 60.9 135 135 135h129c65.3 0 119.1-48.9 127-112h16c17.6 0 32-14.4 32-32V224c0-17.6-14.4-32-32-32z'/%3E%3C/svg%3E");
+        background-image: url("./img/swipe-left.png");
         background-size: contain;
         background-repeat: no-repeat;
-        animation: handSwipe 2.5s infinite ease-in-out;
+        background-position: center;
+        filter: invert();
+        /* filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)); */
+        animation: handSwipe 3s infinite ease-in-out;
       }
 
       @keyframes handSwipe {
         0% {
-          transform: translateX(-50px) rotate(-10deg);
+          transform: translateX(-30px) rotate(-15deg);
+          opacity: 0.6;
+        }
+        25% {
+          opacity: 1;
         }
         50% {
-          transform: translateX(50px) rotate(10deg);
+          transform: translateX(30px) rotate(15deg);
+          opacity: 1;
+        }
+        75% {
+          opacity: 1;
         }
         100% {
-          transform: translateX(-50px) rotate(-10deg);
+          transform: translateX(-30px) rotate(-15deg);
+          opacity: 0.6;
         }
+      }
+
+      /* Floating animation for the entire overlay */
+      #instructionOverlay {
+        animation: float 4s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translate(-50%, -50%) translateY(0px);
+        }
+        50% {
+          transform: translate(-50%, -50%) translateY(-10px);
+        }
+      }
+
+      /* Hide overlay when user has interacted */
+      #instructionOverlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: translate(-50%, -50%) scale(0.9);
       }
     </style>
   </head>
@@ -166,7 +200,7 @@
     <div id="sceneList" class="fixed inset-0 z-40 hidden">
       <div class="absolute inset-0 bg-black/50" id="sceneListOverlay"></div>
       <div
-        class="bg-base-200/95 backdrop-blur-sm w-80 min-h-full p-4 absolute left-0 top-0 transform -translate-x-full transition-transform duration-300 overflow-scroll"
+        class="bg-base-200/95 backdrop-blur-sm w-80 min-h-full p-4 absolute left-0 top-0 transform -translate-x-full transition-transform duration-300"
         id="sceneListContent"
       >
         <div class="flex items-center justify-between mb-6">
@@ -176,7 +210,7 @@
           </button>
         </div>
 
-        <div class="space-y-3 overflow-scroll" id="scenesContainer">
+        <div class="space-y-3" id="scenesContainer">
           <!-- Scene items will be populated by JavaScript -->
         </div>
       </div>
@@ -187,36 +221,54 @@
       <div class="bg-base-300/80 backdrop-blur-sm rounded-full p-2">
         <div class="flex items-center gap-2">
           <!-- Zoom Out -->
-          <button id="viewOut" class="btn btn-ghost btn-square btn-sm">
-            <i class="fas fa-search-minus"></i>
+          <button
+            id="viewOut"
+            class="btn btn-ghost text-white btn-square btn-sm"
+          >
+            <i class="fas fa-search-minus text-lg"></i>
           </button>
 
           <!-- Direction Controls -->
           <div class="grid grid-cols-3 gap-1">
             <div></div>
-            <button id="viewUp" class="btn btn-ghost btn-square btn-sm">
+            <button
+              id="viewUp"
+              class="btn btn-ghost text-white btn-square btn-sm"
+            >
               <i class="fas fa-chevron-up"></i>
             </button>
             <div></div>
 
-            <button id="viewLeft" class="btn btn-ghost btn-square btn-sm">
+            <button
+              id="viewLeft"
+              class="btn btn-ghost text-white btn-square btn-sm"
+            >
               <i class="fas fa-chevron-left"></i>
             </button>
             <div class="w-8 h-8"></div>
-            <button id="viewRight" class="btn btn-ghost btn-square btn-sm">
+            <button
+              id="viewRight"
+              class="btn btn-ghost text-white btn-square btn-sm"
+            >
               <i class="fas fa-chevron-right"></i>
             </button>
 
             <div></div>
-            <button id="viewDown" class="btn btn-ghost btn-square btn-sm">
+            <button
+              id="viewDown"
+              class="btn btn-ghost text-white btn-square btn-sm"
+            >
               <i class="fas fa-chevron-down"></i>
             </button>
             <div></div>
           </div>
 
           <!-- Zoom In -->
-          <button id="viewIn" class="btn btn-ghost btn-square btn-sm">
-            <i class="fas fa-search-plus"></i>
+          <button
+            id="viewIn"
+            class="btn btn-ghost text-white btn-square btn-sm"
+          >
+            <i class="fas fa-search-plus text-lg"></i>
           </button>
         </div>
       </div>
@@ -241,19 +293,49 @@
     <!-- instruction animation Overlay -->
     <div
       id="instructionOverlay"
-      class="fixed inset-0 z-[70] bg-black/80 flex flex-col items-center justify-center transition-opacity duration-500"
+      class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] pointer-events-none transition-all duration-700 ease-in-out"
     >
-      <div class="text-center max-w-md px-4">
-        <div class="relative mb-8">
-          <div class="hand-animation w-24 h-24 mb-4"></div>
-          <h2 class="text-2xl font-bold text-white mb-2">Explore the Tour</h2>
-          <p class="text-white/80">Drag the screen to look around</p>
+      <div class="relative">
+        <!-- Animated gesture container -->
+        <div
+          class="bg-black/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-2xl"
+        >
+          <div class="flex items-center gap-4">
+            <!-- Animated hand gesture -->
+            <div class="relative">
+              <div class="hand-animation w-16 h-16 opacity-80"></div>
+              <!-- Swipe trail effect -->
+              <div
+                class="absolute inset-0 hand-animation w-16 h-16 opacity-40 blur-sm"
+              ></div>
+            </div>
+
+            <!-- Instruction text -->
+            <div class="text-white">
+              <h3 class="text-lg font-semibold mb-1">Drag to explore</h3>
+              <p class="text-white/80 text-sm">
+                Use your mouse or finger to look around
+              </p>
+            </div>
+          </div>
+
+          <!-- Optional close button (smaller, less intrusive) -->
+          <button
+            id="closeInstruction"
+            class="absolute -top-2 -right-2 w-6 h-6 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white/80 hover:text-white transition-all duration-200 pointer-events-auto"
+            title="Close hint"
+          >
+            <i class="fas fa-times text-xs"></i>
+          </button>
         </div>
-        <button id="closeInstruction" class="btn btn-primary mt-4">
-          Got it!
-        </button>
+
+        <!-- Subtle pulsing glow effect -->
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl animate-pulse"
+        ></div>
       </div>
     </div>
+
     <script src="vendor/screenfull.min.js"></script>
     <script src="vendor/bowser.min.js"></script>
     <script src="vendor/marzipano.js"></script>

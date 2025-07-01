@@ -44,6 +44,7 @@
   var currentScene = null;
   var sceneListOpen = false;
   var firstInteraction = true;
+  var userHasInteracted = false; // New flag to track actual interaction
 
   // Detect desktop or mobile mode
   if (window.matchMedia) {
@@ -79,6 +80,8 @@
 
   // Initialize viewer
   var viewer = new Marzipano.Viewer(panoElement, viewerOpts);
+
+  // Show instruction overlay on first load
   showInstruction();
 
   // Create scenes
@@ -225,6 +228,9 @@
   modalBackdrop.addEventListener("click", hideInfoModal);
   sceneListOverlay.addEventListener("click", hideSceneList);
 
+  // Add interaction detection for the panorama
+  setupInteractionDetection();
+
   // Initialize scene list
   initializeSceneList();
 
@@ -236,10 +242,45 @@
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
+  function setupInteractionDetection() {
+    var interactionEvents = ["mousedown", "touchstart", "wheel"];
+
+    interactionEvents.forEach(function (eventType) {
+      panoElement.addEventListener(
+        eventType,
+        function (e) {
+          if (!userHasInteracted) {
+            userHasInteracted = true;
+            hideInstruction();
+          }
+        },
+        { passive: true }
+      );
+    });
+
+    // Also detect view control button interactions
+    var viewControlButtons = [
+      viewUpElement,
+      viewDownElement,
+      viewLeftElement,
+      viewRightElement,
+      viewInElement,
+      viewOutElement,
+    ];
+    viewControlButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        if (!userHasInteracted) {
+          userHasInteracted = true;
+          hideInstruction();
+        }
+      });
+    });
+  }
+
   function initializeSceneList() {
     scenesContainer.innerHTML = "";
 
-    scenes.forEach(function (scene, index) {
+    scenes?.forEach(function (scene, index) {
       var sceneItem = document.createElement("div");
       sceneItem.className =
         "card bg-base-300 hover:bg-base-200 cursor-pointer transition-all duration-300 transform hover:scale-105";
@@ -288,10 +329,7 @@
 
   function switchScene(scene) {
     stopAutorotate();
-    if (firstInteraction) {
-      hideInstruction();
-      firstInteraction = false;
-    }
+    // Remove the firstInteraction hide instruction from here
     scene.view.setParameters(scene.data.initialViewParameters);
     scene.scene.switchTo();
     currentScene = scene;
@@ -509,12 +547,11 @@
     return null;
   }
 
-  // instructions animations functions
+  // Instructions animation functions
   function showInstruction() {
-    if (!localStorage.getItem("tourInstructionShown")) {
-      instructionOverlay.style.display = "flex";
-      localStorage.setItem("tourInstructionShown", "true");
-    }
+    // Always show instruction on first visit, don't check localStorage
+    instructionOverlay.style.display = "flex";
+    instructionOverlay.style.opacity = "1";
   }
 
   function hideInstruction() {
@@ -524,19 +561,14 @@
     }, 500);
   }
 
-  // Add event listeners for instruction
-  closeInstruction.addEventListener("click", hideInstruction);
-  document.addEventListener("mousemove", () => {
-    if (!firstInteraction) return;
+  // Add event listener for manual close button only
+  closeInstruction.addEventListener("click", function () {
+    userHasInteracted = true;
     hideInstruction();
-    firstInteraction = false;
   });
-  document.addEventListener("touchstart", () => {
-    if (!firstInteraction) return;
-    hideInstruction();
-    firstInteraction = false;
-  });
-  // end of instructions animations
+
+  // Remove the automatic hide on mousemove and touchstart
+  // These were causing the instruction to disappear immediately
 
   // Initialize on desktop
   if (!document.body.classList.contains("mobile") && window.innerWidth >= 768) {
