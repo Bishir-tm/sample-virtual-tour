@@ -1,87 +1,227 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>Youtube 360</title>
-<meta charset="utf-8">
-<meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui" />
-<style> @-ms-viewport { width: device-width; } </style>
-<link rel="stylesheet" href="vendor/reset.min.css">
-<link rel="stylesheet" href="style.css">
-</head>
-<body class="multiple-scenes view-control-buttons">
+  <head>
+    <title>Premium Virtual Tour</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui"
+    />
+    <style>
+      @-ms-viewport {
+        width: device-width;
+      }
+    </style>
 
-<div id="pano"></div>
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-<div id="sceneList">
-  <ul class="scenes">
-    
-      <a href="javascript:void(0)" class="scene" data-id="0-living-room">
-        <li class="text">Living Room</li>
-      </a>
-    
-      <a href="javascript:void(0)" class="scene" data-id="1-kitchen">
-        <li class="text">Kitchen</li>
-      </a>
-    
-      <a href="javascript:void(0)" class="scene" data-id="2-courtyard">
-        <li class="text">Courtyard</li>
-      </a>
-    
-      <a href="javascript:void(0)" class="scene" data-id="3-dining">
-        <li class="text">Dining</li>
-      </a>
-    
-      <a href="javascript:void(0)" class="scene" data-id="4-formal-living">
-        <li class="text">Formal Living</li>
-      </a>
-    
-  </ul>
-</div>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
 
-<div id="titleBar">
-  <h1 class="sceneName"></h1>
-</div>
+    <!-- DaisyUI + Tailwind -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
 
-<a href="javascript:void(0)" id="autorotateToggle">
-  <img class="icon off" src="img/play.png">
-  <img class="icon on" src="img/pause.png">
-</a>
+    <!-- Marzipano Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/screenfull.js/5.2.0/screenfull.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bowser/2.11.0/bundled.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marzipano/0.10.2/marzipano.min.js"></script>
 
-<a href="javascript:void(0)" id="fullscreenToggle">
-  <img class="icon off" src="img/fullscreen.png">
-  <img class="icon on" src="img/windowed.png">
-</a>
+    <style>
+      /* Minimal custom CSS - only for Marzipano-specific needs */
+      body,
+      html {
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
 
-<a href="javascript:void(0)" id="sceneListToggle">
-  <img class="icon off" src="img/expand.png">
-  <img class="icon on" src="img/collapse.png">
-</a>
+      #pano {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
 
-<a href="javascript:void(0)" id="viewUp" class="viewControlButton viewControlButton-1">
-  <img class="icon" src="img/up.png">
-</a>
-<a href="javascript:void(0)" id="viewDown" class="viewControlButton viewControlButton-2">
-  <img class="icon" src="img/down.png">
-</a>
-<a href="javascript:void(0)" id="viewLeft" class="viewControlButton viewControlButton-3">
-  <img class="icon" src="img/left.png">
-</a>
-<a href="javascript:void(0)" id="viewRight" class="viewControlButton viewControlButton-4">
-  <img class="icon" src="img/right.png">
-</a>
-<a href="javascript:void(0)" id="viewIn" class="viewControlButton viewControlButton-5">
-  <img class="icon" src="img/plus.png">
-</a>
-<a href="javascript:void(0)" id="viewOut" class="viewControlButton viewControlButton-6">
-  <img class="icon" src="img/minus.png">
-</a>
+      /* Custom animations */
+      .slide-in {
+        transform: translateX(0);
+        transition: transform 0.3s ease-in-out;
+      }
 
-<script src="vendor/screenfull.min.js" ></script>
-<script src="vendor/bowser.min.js" ></script>
-<script src="vendor/marzipano.js" ></script>
+      .slide-out {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+      }
 
-<script src="data.js"></script>
-<script src="index.js"></script>
+      .fade-transition {
+        transition: opacity 0.5s ease-in-out;
+      }
 
-</body>
+      /* Scene preview images */
+      .scene-preview {
+        width: 80px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      /* Custom hotspot styles */
+      .hotspot {
+        cursor: pointer;
+      }
+
+      .link-hotspot {
+        width: 50px;
+        height: 50px;
+        margin-left: -25px;
+        margin-top: -25px;
+      }
+
+      .info-hotspot {
+        width: 40px;
+        height: 40px;
+        margin-left: -20px;
+        margin-top: -20px;
+      }
+    </style>
+  </head>
+  <body class="bg-base-100" data-theme="dark">
+    <!-- Main panorama container -->
+    <div id="pano"></div>
+
+    <!-- Top Navigation Bar -->
+    <div
+      class="navbar bg-base-300/80 backdrop-blur-sm absolute top-0 left-0 right-0 z-50"
+    >
+      <div class="navbar-start">
+        <!-- Scene List Toggle -->
+        <button id="sceneListToggle" class="btn btn-ghost btn-square">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+      </div>
+
+      <div class="navbar-center">
+        <!-- Scene Title -->
+        <h1 id="sceneName" class="text-xl font-semibold text-base-content">
+          Loading...
+        </h1>
+      </div>
+
+      <div class="navbar-end gap-2">
+        <!-- Autorotate Toggle -->
+        <button
+          id="autorotateToggle"
+          class="btn btn-ghost btn-square"
+          title="Toggle Autorotate"
+        >
+          <i class="fas fa-play text-xl" id="autorotateIcon"></i>
+        </button>
+
+        <!-- Fullscreen Toggle -->
+        <button
+          id="fullscreenToggle"
+          class="btn btn-ghost btn-square"
+          title="Fullscreen"
+        >
+          <i class="fas fa-expand text-xl" id="fullscreenIcon"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scene List Sidebar -->
+    <div id="sceneList" class="drawer-side z-40">
+      <label for="drawer-toggle" class="drawer-overlay"></label>
+      <div
+        class="bg-base-200/95 backdrop-blur-sm w-80 min-h-full p-4 slide-out"
+        id="sceneListContent"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-base-content">Scenes</h2>
+          <button id="sceneListClose" class="btn btn-ghost btn-sm btn-square">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="space-y-3" id="scenesContainer">
+          <!-- Scene items will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- View Controls -->
+    <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30">
+      <div class="bg-base-300/80 backdrop-blur-sm rounded-full p-2">
+        <div class="flex items-center gap-2">
+          <!-- Zoom Out -->
+          <button id="viewOut" class="btn btn-ghost btn-square btn-sm">
+            <i class="fas fa-search-minus"></i>
+          </button>
+
+          <!-- Direction Controls -->
+          <div class="grid grid-cols-3 gap-1">
+            <div></div>
+            <button id="viewUp" class="btn btn-ghost btn-square btn-sm">
+              <i class="fas fa-chevron-up"></i>
+            </button>
+            <div></div>
+
+            <button id="viewLeft" class="btn btn-ghost btn-square btn-sm">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="w-8 h-8"></div>
+            <button id="viewRight" class="btn btn-ghost btn-square btn-sm">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <div></div>
+            <button id="viewDown" class="btn btn-ghost btn-square btn-sm">
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div></div>
+          </div>
+
+          <!-- Zoom In -->
+          <button id="viewIn" class="btn btn-ghost btn-square btn-sm">
+            <i class="fas fa-search-plus"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal">
+      <div class="modal-box">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-bold text-lg" id="modalTitle">Information</h3>
+          <button class="btn btn-sm btn-circle btn-ghost" id="modalClose">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div id="modalContent" class="prose max-w-none">
+          <!-- Modal content will be populated by JavaScript -->
+        </div>
+      </div>
+      <div class="modal-backdrop" id="modalBackdrop"></div>
+    </div>
+    <script src="vendor/screenfull.min.js"></script>
+    <script src="vendor/bowser.min.js"></script>
+    <script src="vendor/marzipano.js"></script>
+
+    <script src="data.js"></script>
+    <script src="index.js"></script>
+  </body>
 </html>

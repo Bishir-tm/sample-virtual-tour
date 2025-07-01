@@ -1,0 +1,39 @@
+# Project: Marzipano Virtual Tour UI Revamp
+
+## Goal
+
+Transform the existing Marzipano virtual tour interface into a premium, modern, and intuitive user experience. The current UI is functional but lacks visual appeal and modern design principles. This revamp should focus on aesthetics, usability, and creating a more immersive feel.
+
+## Key Areas for Improvement:
+
+### 1. Overall Design System:
+*   Implement DaisyUI to establish a consistent and professional design system.
+*   Introduce a sophisticated premium color palette.
+*   Improve typography for better readability. Use a clean, modern font like Inter or Lato, which can be imported from Google Fonts.
+
+### 2. Navigation and Controls:
+*   Redesign the main controls (scene switching, zoom, fullscreen) to be more intuitive and visually appealing.
+*   Replace the existing PNG icons with font awesome icons for a sharper, more modern look. Ensure the icons are easily recognizable and appropriately sized.
+*   Group related controls together for better organization. For example, navigation controls (up, down, left, right) should be clustered.
+
+### 3. Scene List / Sidebar:
+*   Overhaul the scene list to be more engaging.
+*   Instead of a simple text list, use preview images for each scene.
+*   Add a subtle hover effect to the scene previews to indicate interactivity.
+*   The scene list should be collapsible to maximize the viewable area of the tour.
+
+### 4. Interactive Elements and Animations:
+*   Introduce subtle animations and transitions to enhance the user experience. For example:
+    *   Smooth fading transitions between scenes.
+    *   A gentle zoom-in/out animation on the controls when hovered over.
+    *   A smooth slide-in/out animation for the scene list.
+
+### 5. Info Hotspots:
+*   Style the info hotspots to be more visually appealing and less intrusive.
+*   Use a clean, modern design for the pop-up boxes that display information.
+
+## Implementation Details:
+
+*   Keep the HTML, CSS, and JS in separate files.
+*   Use DaisyUI classes as much as possible instead of custom CSS, the custom css should not be more than 65 lines.
+*   Reduce the amount of custom CSS in `style.css` to 65 lines or less.
