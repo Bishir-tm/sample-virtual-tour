@@ -21,6 +21,9 @@
   var fullscreenToggleElement = document.querySelector("#fullscreenToggle");
   var fullscreenIcon = document.querySelector("#fullscreenIcon");
   var scenesContainer = document.querySelector("#scenesContainer");
+  var sceneListOverlay = document.querySelector("#sceneListOverlay");
+  var instructionOverlay = document.getElementById("instructionOverlay");
+  var closeInstruction = document.getElementById("closeInstruction");
 
   // View control elements
   var viewUpElement = document.querySelector("#viewUp");
@@ -40,6 +43,7 @@
   // State variables
   var currentScene = null;
   var sceneListOpen = false;
+  var firstInteraction = true;
 
   // Detect desktop or mobile mode
   if (window.matchMedia) {
@@ -75,6 +79,7 @@
 
   // Initialize viewer
   var viewer = new Marzipano.Viewer(panoElement, viewerOpts);
+  showInstruction();
 
   // Create scenes
   var scenes = data.scenes.map(function (sceneData) {
@@ -218,6 +223,7 @@
   autorotateToggleElement.addEventListener("click", toggleAutorotate);
   modalClose.addEventListener("click", hideInfoModal);
   modalBackdrop.addEventListener("click", hideInfoModal);
+  sceneListOverlay.addEventListener("click", hideSceneList);
 
   // Initialize scene list
   initializeSceneList();
@@ -282,6 +288,10 @@
 
   function switchScene(scene) {
     stopAutorotate();
+    if (firstInteraction) {
+      hideInstruction();
+      firstInteraction = false;
+    }
     scene.view.setParameters(scene.data.initialViewParameters);
     scene.scene.switchTo();
     currentScene = scene;
@@ -313,23 +323,22 @@
     });
   }
 
+  var sceneList = document.querySelector("#sceneList");
   function showSceneList() {
     sceneListOpen = true;
-    var sceneList = document.querySelector("#sceneList");
     sceneList.style.display = "block";
-    sceneListContent.classList.remove("slide-out");
-    sceneListContent.classList.add("slide-in");
-    sceneListToggleElement.classList.add("text-primary");
+    setTimeout(() => {
+      sceneListContent.classList.remove("-translate-x-full");
+      sceneListOverlay.style.opacity = "1";
+    }, 10);
   }
 
   function hideSceneList() {
     sceneListOpen = false;
-    sceneListContent.classList.remove("slide-in");
-    sceneListContent.classList.add("slide-out");
-    sceneListToggleElement.classList.remove("text-primary");
+    sceneListContent.classList.add("-translate-x-full");
+    sceneListOverlay.style.opacity = "0";
 
-    setTimeout(function () {
-      var sceneList = document.querySelector("#sceneList");
+    setTimeout(() => {
       sceneList.style.display = "none";
     }, 300);
   }
@@ -500,8 +509,41 @@
     return null;
   }
 
+  // instructions animations functions
+  function showInstruction() {
+    if (!localStorage.getItem("tourInstructionShown")) {
+      instructionOverlay.style.display = "flex";
+      localStorage.setItem("tourInstructionShown", "true");
+    }
+  }
+
+  function hideInstruction() {
+    instructionOverlay.style.opacity = "0";
+    setTimeout(() => {
+      instructionOverlay.style.display = "none";
+    }, 500);
+  }
+
+  // Add event listeners for instruction
+  closeInstruction.addEventListener("click", hideInstruction);
+  document.addEventListener("mousemove", () => {
+    if (!firstInteraction) return;
+    hideInstruction();
+    firstInteraction = false;
+  });
+  document.addEventListener("touchstart", () => {
+    if (!firstInteraction) return;
+    hideInstruction();
+    firstInteraction = false;
+  });
+  // end of instructions animations
+
   // Initialize on desktop
   if (!document.body.classList.contains("mobile") && window.innerWidth >= 768) {
-    showSceneList();
+    setTimeout(() => {
+      showSceneList();
+    }, 1000);
+  } else {
+    sceneListContent.classList.add("-translate-x-full");
   }
 })();

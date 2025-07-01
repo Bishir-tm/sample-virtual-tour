@@ -97,6 +97,26 @@
         margin-left: -20px;
         margin-top: -20px;
       }
+
+      /* instruction animations */
+      .hand-animation {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%23ffffff'%3E%3Cpath d='M480 192h-16v-72C464 53.8 410.2 0 344 0c-38.7 0-74.9 17.4-98.9 46.9C256.2 63.7 256 79.9 256 96v192h-64V80c0-22.1-17.9-40-40-40s-40 17.9-40 40v304c0 74.1 60.9 135 135 135h129c65.3 0 119.1-48.9 127-112h16c17.6 0 32-14.4 32-32V224c0-17.6-14.4-32-32-32z'/%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        animation: handSwipe 2.5s infinite ease-in-out;
+      }
+
+      @keyframes handSwipe {
+        0% {
+          transform: translateX(-50px) rotate(-10deg);
+        }
+        50% {
+          transform: translateX(50px) rotate(10deg);
+        }
+        100% {
+          transform: translateX(-50px) rotate(-10deg);
+        }
+      }
     </style>
   </head>
   <body class="bg-base-100" data-theme="dark">
@@ -143,10 +163,10 @@
     </div>
 
     <!-- Scene List Sidebar -->
-    <div id="sceneList" class="drawer-side z-40">
-      <label for="drawer-toggle" class="drawer-overlay"></label>
+    <div id="sceneList" class="fixed inset-0 z-40 hidden">
+      <div class="absolute inset-0 bg-black/50" id="sceneListOverlay"></div>
       <div
-        class="bg-base-200/95 backdrop-blur-sm w-80 min-h-full p-4 slide-out"
+        class="bg-base-200/95 backdrop-blur-sm w-80 min-h-full p-4 absolute left-0 top-0 transform -translate-x-full transition-transform duration-300 overflow-scroll"
         id="sceneListContent"
       >
         <div class="flex items-center justify-between mb-6">
@@ -156,7 +176,7 @@
           </button>
         </div>
 
-        <div class="space-y-3" id="scenesContainer">
+        <div class="space-y-3 overflow-scroll" id="scenesContainer">
           <!-- Scene items will be populated by JavaScript -->
         </div>
       </div>
@@ -216,6 +236,23 @@
         </div>
       </div>
       <div class="modal-backdrop" id="modalBackdrop"></div>
+    </div>
+
+    <!-- instruction animation Overlay -->
+    <div
+      id="instructionOverlay"
+      class="fixed inset-0 z-[70] bg-black/80 flex flex-col items-center justify-center transition-opacity duration-500"
+    >
+      <div class="text-center max-w-md px-4">
+        <div class="relative mb-8">
+          <div class="hand-animation w-24 h-24 mb-4"></div>
+          <h2 class="text-2xl font-bold text-white mb-2">Explore the Tour</h2>
+          <p class="text-white/80">Drag the screen to look around</p>
+        </div>
+        <button id="closeInstruction" class="btn btn-primary mt-4">
+          Got it!
+        </button>
+      </div>
     </div>
     <script src="vendor/screenfull.min.js"></script>
     <script src="vendor/bowser.min.js"></script>
